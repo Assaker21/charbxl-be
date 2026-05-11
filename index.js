@@ -9,11 +9,12 @@ const app = express();
 
 app.use(express.json());
 
-app.post("institutions/:institutionCode/contact", async (req, res) => {
+app.post("/institutions/:institutionCode/contact", async (req, res) => {
   try {
-    const [results] = sql.query("SELECT * FROM INTITUTION WHERE CODE = ?", [
-      req.params.institutionCode,
-    ]);
+    const [results] = await sql.query(
+      "SELECT * FROM INTITUTION WHERE CODE = ?",
+      [req.params.institutionCode],
+    );
 
     if (!results?.length) {
       throw new Error(
@@ -42,7 +43,7 @@ app.post("institutions/:institutionCode/contact", async (req, res) => {
 
     res.send("Email was sent successfully");
   } catch (err) {
-    console.err(err);
+    console.error(err);
     res.status(500).send("An error occurred");
   }
 });
