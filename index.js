@@ -4,15 +4,36 @@ configDotenv({ quiet: true });
 import express from "express";
 import sql from "./db.js";
 import { sendMail } from "./mailer.js";
+import { checkMailtrapLimit } from "./mailtrap.js";
 
 const app = express();
 
 app.use(express.json());
 
-app.post("/institutions/:institutionCode/contact", async (req, res) => {
+app.get("/", async (req, res) => {
+  res.send("running");
+});
+
+app.get("/mail/limits", async (req, res) => {
+  const response = await checkMailtrapLimit();
+  res.send(response || "Not available");
+});
+
+app.get("/ping", async (req, res) => {
+  try {
+    await sql.query("SELECT * FROM institution WHERE CODE = ?", [
+      req.params.institutionCode,
+    ]);
+    res.send("Yes");
+  } catch (err) {
+    res.send("No: " + err);
+  }
+});
+
+app.post("/institutions/:institutionCode/forward", async (req, res) => {
   try {
     const [results] = await sql.query(
-      "SELECT * FROM INTITUTION WHERE CODE = ?",
+      "SELECT * FROM institution WHERE CODE = ?",
       [req.params.institutionCode],
     );
 
@@ -33,11 +54,12 @@ app.post("/institutions/:institutionCode/contact", async (req, res) => {
     await sendMail({
       to: institution.forwardEmail,
       subject: "Forwarded mail from " + institution.domain,
-      body: `Someone has contacted you from the website form
-      Full name: ${req.body.name}
-      Email address: ${req.body.email}
-      Subject: ${req.body.subject}
-      Message: ${req.body.message}
+      body: `Someone has contacted you from the website contact form
+
+Full name: ${req.body.name}
+Email address: ${req.body.email}
+Subject: ${req.body.subject}
+Message: ${req.body.message}
       `,
     });
 

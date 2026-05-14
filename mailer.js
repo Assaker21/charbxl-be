@@ -1,11 +1,14 @@
+import { configDotenv } from "dotenv";
+configDotenv({ quiet: true });
+
 import nodemailer from "nodemailer";
 
 let transporter;
 try {
-  transporter = nodemailer.createTransport({
-    host: "smtp.example.com",
-    port: 587,
-    secure: false,
+  console.log("Process: ", process.env.SMTP_HOST);
+  transporter = await nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
