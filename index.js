@@ -1,12 +1,15 @@
 import { configDotenv } from "dotenv";
 configDotenv({ quiet: true });
 
+import cors from "cors";
 import express from "express";
+
 import sql from "./db.js";
 import { sendMail } from "./mailer.js";
 import { checkMailtrapLimit } from "./mailtrap.js";
 
 const app = express();
+app.use(cors());
 
 app.use(express.json());
 
