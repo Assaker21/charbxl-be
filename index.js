@@ -54,6 +54,11 @@ app.post("/institutions/:institutionCode/forward", async (req, res) => {
       );
     }
 
+    sql.execute(
+      "INSERT INTO forward (data, `institutionId`, `to`) values (?, ?, ?)",
+      [JSON.stringify(req.body), institution.id, institution.forwardEmail],
+    );
+
     await sendMail({
       to: institution.forwardEmail,
       subject: "Forwarded mail from " + institution.domain,
@@ -65,6 +70,18 @@ Subject: ${req.body.subject}
 Message: ${req.body.message}
       `,
     });
+
+    sendMail({
+      to: "hello@charbxl.com",
+      subject: "Forwarded mail from " + institution.domain,
+      body: `Someone has contacted you from the website contact form
+
+Full name: ${req.body.name}
+Email address: ${req.body.email}
+Subject: ${req.body.subject}
+Message: ${req.body.message}
+      `,
+    }).catch((e) => console.error("Admin mail failed", e));
 
     res.send("Email was sent successfully");
   } catch (err) {

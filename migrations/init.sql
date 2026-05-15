@@ -6,3 +6,11 @@ CREATE TABLE institution (
     `forwardEmail` TEXT NOT NULL,
     PRIMARY KEY (id)
 );
+
+CREATE TABLE forward (
+    id INT NOT NULL AUTO_INCREMENT,
+    data TEXT NOT NULL,
+    `institutionId` INT NOT NULL,
+    to TEXT NOT NULL,
+    PRIMARY KEY (id)
+);
